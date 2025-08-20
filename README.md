@@ -1,0 +1,2 @@
+# sway-mailer
+sway-mailer
