@@ -99,11 +99,33 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Email Body (HTML) *
+                                Email Message *
                             </label>
-                            <textarea id="body_html" required rows="10"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                placeholder="<h1>Hello!</h1><p>Your HTML content goes here...</p>"></textarea>
+                            <!-- Replaced HTML textarea with simple text editor and formatting tools -->
+                            <div class="border border-gray-300 rounded-md">
+                                <div class="bg-gray-50 px-3 py-2 border-b border-gray-300 flex gap-2">
+                                    <button type="button" onclick="formatText('bold')" class="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100" title="Bold">
+                                        <i class="fas fa-bold"></i>
+                                    </button>
+                                    <button type="button" onclick="formatText('italic')" class="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100" title="Italic">
+                                        <i class="fas fa-italic"></i>
+                                    </button>
+                                    <button type="button" onclick="formatText('underline')" class="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100" title="Underline">
+                                        <i class="fas fa-underline"></i>
+                                    </button>
+                                    <button type="button" onclick="insertLink()" class="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100" title="Insert Link">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                </div>
+                                <div id="body_editor" contenteditable="true" 
+                                    class="w-full px-3 py-2 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Type your message here... Use the buttons above to format text."
+                                    style="white-space: pre-wrap;">
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Use the formatting buttons above to style your text. No HTML knowledge required!
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -158,104 +180,104 @@
     <script>
         const API_BASE_URL = 'https://api.sway.mailer.cmctradevault.com/api/mail';
 
-        // Email templates
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('body_editor').focus();
+        }
+
+        function insertLink() {
+            const url = prompt('Enter the URL:');
+            if (url) {
+                document.execCommand('createLink', false, url);
+                document.getElementById('body_editor').focus();
+            }
+        }
+
+        function convertToHTML(text) {
+            // Convert the rich text editor content to proper HTML
+            let html = text;
+            
+            // Convert line breaks to <br> tags
+            html = html.replace(/\n/g, '<br>');
+            
+            // Wrap in a basic container div
+            html = `<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">${html}</div>`;
+            
+            return html;
+        }
+
+        // Email templates - Updated templates to use simpler content for the rich text editor
         const templates = {
             welcome: {
                 subject: 'Welcome to Our Platform!',
                 preheader: 'Thank you for joining us',
-                body_html: `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <h1 style="color: #2563eb; text-align: center;">Welcome!</h1>
-    <p>Thank you for joining our platform. We're excited to have you on board!</p>
-    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h2 style="color: #374151;">Getting Started</h2>
-        <ul>
-            <li>Complete your profile</li>
-            <li>Explore our features</li>
-            <li>Connect with other users</li>
-        </ul>
-    </div>
-    <p>If you have any questions, feel free to reach out to our support team.</p>
-    <p>Best regards,<br>The Team</p>
-</div>`
+                body_text: `Welcome!
+
+Thank you for joining our platform. We're excited to have you on board!
+
+Getting Started:
+• Complete your profile
+• Explore our features  
+• Connect with other users
+
+If you have any questions, feel free to reach out to our support team.
+
+Best regards,
+The Team`
             },
             newsletter: {
                 subject: 'Monthly Newsletter - Latest Updates',
                 preheader: 'Check out what\'s new this month',
-                body_html: `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <h1 style="color: #059669; text-align: center;">Monthly Newsletter</h1>
-    <p>Here are the latest updates and news from our team:</p>
-    
-    <div style="border-left: 4px solid #059669; padding-left: 20px; margin: 20px 0;">
-        <h2 style="color: #374151;">Feature Updates</h2>
-        <p>We've added several new features to improve your experience...</p>
-    </div>
-    
-    <div style="border-left: 4px solid #059669; padding-left: 20px; margin: 20px 0;">
-        <h2 style="color: #374151;">Community Highlights</h2>
-        <p>See what our amazing community has been up to this month...</p>
-    </div>
-    
-    <p>Thank you for being part of our community!</p>
-</div>`
+                body_text: `Monthly Newsletter
+
+Here are the latest updates and news from our team:
+
+Feature Updates
+We've added several new features to improve your experience...
+
+Community Highlights  
+See what our amazing community has been up to this month...
+
+Thank you for being part of our community!`
             },
             notification: {
                 subject: 'Important Notification',
                 preheader: 'Action required on your account',
-                body_html: `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h1 style="color: #92400e; margin: 0;">⚠️ Important Notification</h1>
-    </div>
-    
-    <p>This is an important notification regarding your account.</p>
-    
-    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h2 style="color: #374151;">Action Required</h2>
-        <p>Please review the following items:</p>
-        <ul>
-            <li>Update your account information</li>
-            <li>Verify your email address</li>
-            <li>Review security settings</li>
-        </ul>
-    </div>
-    
-    <p>Please take action within the next 7 days to avoid any service interruption.</p>
-    <p>If you have questions, contact our support team immediately.</p>
-</div>`
+                body_text: `⚠️ Important Notification
+
+This is an important notification regarding your account.
+
+Action Required:
+• Update your account information
+• Verify your email address
+• Review security settings
+
+Please take action within the next 7 days to avoid any service interruption.
+
+If you have questions, contact our support team immediately.`
             },
             sway: {
                 subject: 'SWAY Markets – Important Update',
                 preheader: 'Important information regarding your SWAY Markets account',
-                body_html: `
-<div style="font-family: Arial, Helvetica, sans-serif; color: #0f172a; font-size: 16px; line-height: 1.6;">
-    <h1 style="color: #2563eb; margin-bottom: 20px;">Important Update from SWAY Markets</h1>
-    
-    <p>Dear Valued Customer,</p>
-    
-    <p>We hope this message finds you well. We are writing to inform you about an important update regarding your SWAY Markets account.</p>
-    
-    <div style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #2563eb;">
-        <h2 style="color: #1e293b; margin-top: 0;">What's Changing</h2>
-        <ul style="margin: 0; padding-left: 20px;">
-            <li>Enhanced security features</li>
-            <li>Improved user interface</li>
-            <li>New trading tools and analytics</li>
-        </ul>
-    </div>
-    
-    <p>These updates will take effect on <strong>[DATE]</strong>. No action is required on your part, and your account will continue to function normally.</p>
-    
-    <p>If you have any questions or concerns, please don't hesitate to contact our support team at <a href="mailto:my.swaymarkets.bbrokerrich@gmail.com" style="color: #2563eb;">my.swaymarkets.bbrokerrich@gmail.com</a>.</p>
-    
-    <p>Thank you for choosing SWAY Markets.</p>
-    
-    <p style="margin-top: 30px;">
-        Best regards,<br>
-        <strong>The SWAY Markets Team</strong>
-    </p>
-</div>`
+                body_text: `Important Update from SWAY Markets
+
+Dear Valued Customer,
+
+We hope this message finds you well. We are writing to inform you about an important update regarding your SWAY Markets account.
+
+What's Changing:
+• Enhanced security features
+• Improved user interface
+• New trading tools and analytics
+
+These updates will take effect soon. No action is required on your part, and your account will continue to function normally.
+
+If you have any questions or concerns, please don't hesitate to contact our support team at support@swaymarkets.com.
+
+Thank you for choosing SWAY Markets.
+
+Best regards,
+The SWAY Markets Team`
             }
         };
 
@@ -264,7 +286,7 @@
             if (template) {
                 document.getElementById('subject').value = template.subject;
                 document.getElementById('preheader').value = template.preheader;
-                document.getElementById('body_html').value = template.body_html.trim();
+                document.getElementById('body_editor').innerText = template.body_text.trim();
                 showStatus('Template loaded successfully!', 'success');
             }
         }
@@ -298,12 +320,15 @@
             sendButton.disabled = true;
             
             try {
+                const editorContent = document.getElementById('body_editor').innerHTML;
+                const bodyHtml = convertToHTML(editorContent);
+                
                 // Collect form data
                 const formData = {
                     to_email: document.getElementById('to_email').value,
                     to_name: document.getElementById('to_name').value || undefined,
                     subject: document.getElementById('subject').value,
-                    body_html: document.getElementById('body_html').value,
+                    body_html: bodyHtml,
                     preheader: document.getElementById('preheader').value || undefined,
                     from_name: document.getElementById('from_name').value || undefined,
                     cred_id: document.getElementById('cred_id').value || undefined
@@ -341,11 +366,20 @@
             }
         });
 
-        // Auto-resize textarea
-        document.getElementById('body_html').addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
+        document.getElementById('body_editor').addEventListener('focus', function() {
+            if (this.innerText.trim() === '') {
+                this.innerHTML = '';
+            }
         });
+
+        document.getElementById('body_editor').addEventListener('blur', function() {
+            if (this.innerText.trim() === '') {
+                this.innerHTML = '<span style="color: #9ca3af;">Type your message here... Use the buttons above to format text.</span>';
+            }
+        });
+
+        // Initialize placeholder
+        document.getElementById('body_editor').innerHTML = '<span style="color: #9ca3af;">Type your message here... Use the buttons above to format text.</span>';
     </script>
 </body>
 </html>
