@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zentry — Bank Email Sender</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root { color-scheme: light dark; }
+    .glass {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+    }
+    @media (prefers-color-scheme: dark) {
+      .glass { background: rgba(17,24,39,0.6); }
+    }
+  </style>
+</head>
+<body class="min-h-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-950">
+  <header class="px-4 sm:px-6 lg:px-8 pt-8">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-indigo-600 dark:bg-indigo-500 grid place-items-center text-white font-bold">Z</div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100">Bank Email Sender</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Send styled transaction notices through your /mail/bank-notify route</p>
+        </div>
+      </div>
+      <button id="darkToggle" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+        Toggle theme
+      </button>
+    </div>
+  </header>
+
+  <main class="px-4 sm:px-6 lg:px-8 py-6">
+    <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-6">
+      <!-- FORM -->
+      <section class="glass rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">Compose</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-5">Fill in details and hit “Send Email”.</p>
+
+          <form id="mailForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Left column -->
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Recipient (to) *</label>
+              <input name="to" type="email" required placeholder="recipient@example.com" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Bank name *</label>
+              <input name="bank_name" required placeholder="Zentry Financial" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Amount (number) *</label>
+              <input name="amount" type="number" step="0.01" min="0.01" required placeholder="1000.00" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Currency</label>
+              <input name="currency" value="USD" placeholder="USD" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Status *</label>
+              <select name="status" required class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+                <option value="">Select status…</option>
+                <option value="pending">pending</option>
+                <option value="completed">completed</option>
+                <option value="failed">failed</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Alert *</label>
+              <select name="alert" required class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+                <option value="">Select alert…</option>
+                <option>ACCOUNT AUTHENTICATION REQUIRED</option>
+                <option>ACCOUNT NOT VERIFIED</option>
+                <option>ACCOUNT VERIFICATION FAILED</option>
+                <option>TRANSFER FEE REQUIRED</option>
+                <option>GIFT CARD REQUIRED</option>
+                <option>GIFT CARD INVALID</option>
+                <option>ACCOUNT SUSPENDED</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Account name</label>
+              <input name="account_name" placeholder="Keating Woodman" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Account number</label>
+              <input name="account_number" placeholder="0012345678" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Recipient bank</label>
+              <input name="recipient_bank" placeholder="First United Bank" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Recipient name</label>
+              <input name="recipient_name" placeholder="Starr Hawkins" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Reference</label>
+              <input name="reference" placeholder="ZENT-2025-0831-338990" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Note</label>
+              <textarea name="note" rows="3" placeholder="Write a short note shown in the email…" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">From name</label>
+              <input name="from_name" placeholder="Zentry Notifications" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">From email (optional)</label>
+              <input name="from_email" type="email" placeholder="servicedeskauthority@gmail.com" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">cred_id (optional)</label>
+              <input name="cred_id" type="number" min="1" placeholder="Latest if empty" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Attachments (optional)</label>
+              <input id="attachments" type="file" multiple class="mt-1 block w-full text-sm text-slate-600 dark:text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-slate-800 dark:file:text-slate-200" />
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Small files recommended. Will be encoded as base64 and sent inline.</p>
+            </div>
+
+            <div class="sm:col-span-2 flex items-center justify-between pt-2">
+              <div class="text-xs text-slate-500 dark:text-slate-400">Required fields marked with *</div>
+              <div class="flex gap-3">
+                <button type="button" id="previewBtn" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Preview</button>
+                <button id="sendBtn" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">Send Email</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- PREVIEW -->
+      <section class="glass rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Preview</h2>
+          <div id="previewCard" class="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white/70 dark:bg-slate-900/60">
+            <div class="flex items-center justify-between gap-3">
+              <div class="font-semibold text-slate-800 dark:text-slate-100" id="pv_bank">Zentry Financial</div>
+              <div id="pv_status" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500 text-white">PENDING</div>
+            </div>
+            <div class="mt-2 text-sm text-slate-600 dark:text-slate-300" id="pv_subject">[Zentry Financial] Transfer PENDING • $1,000.00 • Ref N/A</div>
+            <div class="mt-4 grid sm:grid-cols-2 gap-3 text-sm">
+              <div><span class="text-slate-500 dark:text-slate-400">To:</span> <span id="pv_to">recipient@example.com</span></div>
+              <div><span class="text-slate-500 dark:text-slate-400">Currency:</span> <span id="pv_currency">USD</span></div>
+              <div><span class="text-slate-500 dark:text-slate-400">Amount:</span> <span id="pv_amount">$1,000.00</span></div>
+              <div><span class="text-slate-500 dark:text-slate-400">Reference:</span> <span id="pv_ref">N/A</span></div>
+            </div>
+            <div class="mt-4">
+              <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Alert</div>
+              <div id="pv_alert" class="inline-block mt-1 px-2.5 py-1 rounded-md bg-yellow-300 text-slate-900 text-xs font-bold">TRANSFER FEE REQUIRED</div>
+            </div>
+            <div class="mt-4 text-xs text-slate-500 dark:text-slate-400">From: <span id="pv_from">Zentry Notifications &lt;servicedeskauthority@gmail.com&gt;</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Toasts -->
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 hidden px-4 py-2 rounded-xl shadow-lg text-white text-sm"></div>
+
+  <script>
+    // === Config ===
+    const API_BASE = "https://api.sway.mailer.cmctradevault.com/api"; // e.g. "http://localhost:4000" — keep empty if same origin
+    const ROUTE = "/mail/bank-notify";
+
+    // === Helpers ===
+    const $ = s => document.querySelector(s);
+    const form = $("#mailForm");
+    const sendBtn = $("#sendBtn");
+    const previewBtn = $("#previewBtn");
+    const toast = $("#toast");
+    const attInput = $("#attachments");
+
+    function showToast(msg, type="info") {
+      const colors = {
+        info:   "bg-slate-900",
+        ok:     "bg-emerald-600",
+        warn:   "bg-amber-600",
+        err:    "bg-rose-600",
+      };
+      toast.textContent = msg;
+      toast.className = `fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl shadow-lg text-white text-sm ${colors[type]||colors.info}`;
+      toast.classList.remove("hidden");
+      setTimeout(()=>toast.classList.add("hidden"), 3000);
+    }
+
+    function formatMoney(n, currency) {
+      const num = Number(n || 0);
+      try {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: currency || "USD" }).format(num);
+      } catch {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(num);
+      }
+    }
+
+    function statusColor(s) {
+      const map = { pending: "bg-amber-500", completed: "bg-emerald-600", failed: "bg-rose-600" };
+      return map[s] || "bg-slate-500";
+    }
+
+    async function filesToAttachments(files) {
+      const atts = [];
+      for (const file of files) {
+        const buf = await file.arrayBuffer();
+        const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+        atts.push({ filename: file.name, content: b64, encoding: "base64" });
+      }
+      return atts;
+    }
+
+    function readForm() {
+      const fd = new FormData(form);
+      const data = Object.fromEntries(fd.entries());
+      // Normalize numerics
+      if (data.amount) data.amount = Number(data.amount);
+      if (data.cred_id) data.cred_id = Number(data.cred_id);
+      return data;
+    }
+
+    function updatePreview() {
+      const d = readForm();
+      const amountStr = formatMoney(d.amount, d.currency || "USD");
+      const subj = `[${d.bank_name || "Bank"}] Transfer ${(d.status||"").toUpperCase() || "PENDING"} • ${amountStr} • Ref ${d.reference || "N/A"}`;
+      $("#pv_subject").textContent = subj;
+      $("#pv_bank").textContent = d.bank_name || "Zentry Financial";
+      $("#pv_to").textContent = d.to || "recipient@example.com";
+      $("#pv_currency").textContent = d.currency || "USD";
+      $("#pv_amount").textContent = amountStr;
+      $("#pv_ref").textContent = d.reference || "N/A";
+      $("#pv_alert").textContent = d.alert || "TRANSFER FEE REQUIRED";
+      const st = (d.status || "pending").toLowerCase();
+      const pvStatus = $("#pv_status");
+      pvStatus.textContent = st.toUpperCase();
+      pvStatus.className = `text-xs font-semibold px-2.5 py-1 rounded-full text-white ${statusColor(st)}`;
+      const fe = d.from_email || "servicedeskauthority@gmail.com";
+      const fn = d.from_name || "Zentry Notifications";
+      $("#pv_from").textContent = `${fn} <${fe}>`;
+    }
+
+    // Live preview on changes
+    form.addEventListener("input", updatePreview);
+    previewBtn.addEventListener("click", e => { e.preventDefault(); updatePreview(); showToast("Preview updated", "info"); });
+
+    // Send
+    sendBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const d = readForm();
+
+      // Basic validation
+      if (!d.to || !d.bank_name || !(Number(d.amount) > 0) || !d.status || !d.alert) {
+        showToast("Fill all required fields (*)", "warn");
+        return;
+      }
+
+      // Attachments
+      let attachments = [];
+      try {
+        attachments = await filesToAttachments(attInput.files || []);
+      } catch (err) {
+        console.error(err);
+        showToast("Attachment read failed", "err");
+        return;
+      }
+
+      const payload = {
+        to: d.to,
+        bank_name: d.bank_name,
+        amount: d.amount,
+        currency: d.currency || "USD",
+        status: d.status,
+        alert: d.alert,
+        account_name: d.account_name || undefined,
+        account_number: d.account_number || undefined,
+        recipient_name: d.recipient_name || undefined,
+        recipient_bank: d.recipient_bank || undefined,
+        reference: d.reference || undefined,
+        note: d.note || undefined,
+        from_name: d.from_name || undefined,
+        from_email: d.from_email || undefined,
+        cred_id: d.cred_id || undefined,
+        attachments
+      };
+
+      // UI state
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Sending…";
+
+      try {
+        const res = await fetch((API_BASE || "") + ROUTE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const out = await res.json().catch(()=>({}));
+        if (!res.ok || out.ok === false) {
+          throw new Error(out.error || out.message || `HTTP ${res.status}`);
+        }
+        showToast("Email sent ✅", "ok");
+      } catch (err) {
+        console.error(err);
+        showToast(`Send failed: ${err.message || err}`, "err");
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send Email";
+      }
+    });
+
+    // Theme toggle
+    $("#darkToggle").addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+    });
+
+    // Initial preview
+    updatePreview();
+  </script>
+</body>
+</html>
