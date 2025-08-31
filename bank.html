@@ -129,7 +129,17 @@
 
             <div>
               <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">cred_id (optional)</label>
-              <input name="cred_id" type="number" min="1" placeholder="Latest if empty" class="mt-1 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+              <div class="flex gap-2">
+                <select name="cred_id" id="credSelect" 
+                    class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 outline-none focus:ring-2 ring-indigo-500">
+                  <option value="">Latest if empty</option>
+                </select>
+                <button type="button" id="refreshCredsBtn" 
+                    class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  <i class="fas fa-refresh text-sm"></i>
+                </button>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Select from available email credentials</p>
             </div>
 
             <div>
@@ -183,6 +193,7 @@
     // === Config ===
     const API_BASE = "https://api.sway.mailer.cmctradevault.com/api"; // e.g. "http://localhost:4000" — keep empty if same origin
     const ROUTE = "/mail/bank-notify";
+    const CREDS_ROUTE = "/mail-creds";
 
     // === Helpers ===
     const $ = s => document.querySelector(s);
@@ -234,7 +245,7 @@
       const data = Object.fromEntries(fd.entries());
       // Normalize numerics
       if (data.amount) data.amount = Number(data.amount);
-      if (data.cred_id) data.cred_id = Number(data.cred_id);
+      if (data.cred_id && data.cred_id !== "") data.cred_id = Number(data.cred_id);
       return data;
     }
 
@@ -331,8 +342,52 @@
       document.documentElement.classList.toggle("dark");
     });
 
-    // Initial preview
+    // Credential loading functionality
+    async function loadCredentials() {
+      const select = $("#credSelect");
+      const refreshBtn = $("#refreshCredsBtn");
+      
+      // Show loading state
+      refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
+      refreshBtn.disabled = true;
+      
+      try {
+        const response = await fetch((API_BASE || "") + CREDS_ROUTE);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const credentials = await response.json();
+        
+        // Clear existing options except the first one
+        select.innerHTML = '<option value="">Latest if empty</option>';
+        
+        // Add credential options
+        credentials.forEach(cred => {
+          const option = document.createElement('option');
+          option.value = cred.id;
+          option.textContent = `ID: ${cred.id} - ${cred.email_user}`;
+          select.appendChild(option);
+        });
+        
+        showToast(`Loaded ${credentials.length} credentials`, "ok");
+        
+      } catch (error) {
+        console.error('Error loading credentials:', error);
+        showToast(`Failed to load credentials: ${error.message}`, "err");
+      } finally {
+        // Reset button
+        refreshBtn.innerHTML = '<i class="fas fa-refresh text-sm"></i>';
+        refreshBtn.disabled = false;
+      }
+    }
+
+    // Refresh button event listener
+    $("#refreshCredsBtn").addEventListener("click", loadCredentials);
+
+    // Initial preview and auto-load credentials on page load
     updatePreview();
+    loadCredentials();
   </script>
 </body>
 </html>
